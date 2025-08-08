@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Estudos Salvos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class'
+        }
+    </script>
+    <script>
+        // Ativa modo escuro baseado no localStorage
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.classList.add('dark');
+        }
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById("sidebar");
+            const overlay = document.getElementById("overlay");
+
+            const isHidden = sidebar.classList.contains("-translate-x-full");
+            sidebar.classList.toggle("-translate-x-full");
+            overlay.classList.toggle("hidden");
+
+            // Animação de opacidade do overlay
+            if (isHidden) {
+                overlay.classList.add("opacity-100");
+                overlay.classList.remove("opacity-0");
+            } else {
+                overlay.classList.remove("opacity-100");
+                overlay.classList.add("opacity-0");
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-gray-300 text-gray-900 dark:bg-gray-900 dark:text-gray-100 transition-all duration-300">
+    <!-- Botão para abrir/fechar sidebar -->
+    <button onclick="toggleSidebar()" class="m-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+        📁 Menu
+    </button>
+
+    <div class="flex ">
+        <!-- Sidebar animada -->
+        <aside id="sidebar"
+            class="fixed top-0 left-0 h-1/2 w-80 bg-white rounded-br-lg mb-6 dark:bg-gray-800 shadow-md p-8 space-y-6 transform -translate-x-full transition-transform duration-300 z-50">
+            <div class="flex justify-between items-center">
+                <h2 class="text-2xl font-bold">📖 Meu Painel</h2>
+                <button onclick="toggleSidebar()" class="text-red-600 hover:text-red-800 text-xl">✖</button>
+            </div>
+
+            <nav class="flex flex-col space-y-4 mt-4">
+                <a href="/" class="text-blue-600 hover:underline">➕ Novo Estudo</a>
+                <a href="/estudos" class="text-blue-600 hover:underline">📋 Lista de Estudos</a>
+            </nav>
+
+            <button onclick="toggleTheme()"
+                class="bg-gray-200 dark:bg-gray-800 dark:text-white px-3 py-1 rounded text-sm hover:bg-gray-300 dark:hover:bg-gray-700">
+                🌗 Alternar Tema
+            </button>
+        </aside>
+
+
+        <div id="overlay" onclick="toggleSidebar()"
+            class="fixed inset-0 bg-black bg-opacity-40 z-40 hidden transition-opacity duration-300"></div>
+
+        <!-- Conteúdo principal -->
+        <main class="flex-1 p-10 transition-all duration-300">
+            <div
+                class="max-w-4xl mx-auto mt-10 p-6 bg-white dark:bg-gray-800 shadow-lg rounded-xl">
+                <h1 class="text-3xl font-bold mb-4">🗂️ Estudos Registrados</h1>
+
+                <div class="space-y-4">
+                    <div th:each="estudo : ${estudos}" class="border-b pb-3 flex flex-col">
+                        <div class="flex justify-between items-center">
+                            <a th:href="@{/estudos/{id}(id=${estudo.id})}"
+                                class="dark:text-white hover:underline text-lg font-semibold">
+                                <span th:text="${estudo.titulo}">Título</span>
+                            </a>
+                            <form th:action="@{/estudos/{id}/excluir(id=${estudo.id})}" method="post" class="inline">
+                                <button type="submit" onclick="return confirm('Tem certeza que deseja excluir?')"
+                                    class="text-red-600 hover:underline ml-4 text-sm">
+                                    🗑️ Excluir
+                                </button>
+                            </form>
+                        </div>
+                        <p class="text-gray-600 text-sm" th:text="${#strings.abbreviate(estudo.descricao, 100)}">Resumo
+                        </p>
+                    </div>
+                </div>
+                <div class="mt-6">
+                    <a href="/" class="text-blue-700 hover:underline">← Voltar para nova anotação</a>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+
+</html>
